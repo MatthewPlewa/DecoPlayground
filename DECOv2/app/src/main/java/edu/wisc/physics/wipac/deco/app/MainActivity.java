@@ -388,15 +388,13 @@ public class MainActivity extends Activity
         {
             DecoApp.i(TAG, "Supported hardware level (" + supportedHardwareLevel + ") does not support exposure time range characteristic");
             MainActivity.this.runOnUiThread(
-                new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        mTextUpperExposure.setText(getString(R.string.not_supported));
-                        mTextActualExposure.setText(getString(R.string.not_supported));
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            mTextUpperExposure.setText(getString(R.string.not_supported));
+                            mTextActualExposure.setText(getString(R.string.not_supported));
+                        }
                     }
-                }
             );
         }
 
@@ -411,6 +409,7 @@ public class MainActivity extends Activity
         captureRequestBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
         captureRequestBuilder.set(CaptureRequest.BLACK_LEVEL_LOCK, false);// without it unlocked it might cause issues
         captureRequestBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, characteristics.get(SENSOR_MAX_ANALOG_SENSITIVITY));
+        captureRequestBuilder.set(CaptureRequest.JPEG_QUALITY, Byte.valueOf(100 + ""));
 
         return captureRequestBuilder;
     }
