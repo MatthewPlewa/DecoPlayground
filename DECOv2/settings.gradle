@@ -1,1 +1,1 @@
-include ':app', ':decov2service'
+include ':decov2service', ':app'
