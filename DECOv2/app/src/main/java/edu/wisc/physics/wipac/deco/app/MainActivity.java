@@ -410,6 +410,9 @@ public class MainActivity extends Activity
         captureRequestBuilder.set(CaptureRequest.BLACK_LEVEL_LOCK, false);// without it unlocked it might cause issues
         captureRequestBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, characteristics.get(SENSOR_MAX_ANALOG_SENSITIVITY));
 
+        // added by Matthew Plewa
+        captureRequestBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);// added this because this is the softwere filter for noise and cosmic rays are noise
+        captureRequestBuilder.set(CaptureRequest.JPEG_QUALITY, Byte.valueOf(100 + ""));
         return captureRequestBuilder;
     }
 
