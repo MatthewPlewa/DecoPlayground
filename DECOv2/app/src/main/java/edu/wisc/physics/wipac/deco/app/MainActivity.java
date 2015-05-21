@@ -409,7 +409,7 @@ public class MainActivity extends Activity
         captureRequestBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
         captureRequestBuilder.set(CaptureRequest.BLACK_LEVEL_LOCK, false);// without it unlocked it might cause issues
         captureRequestBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, characteristics.get(SENSOR_MAX_ANALOG_SENSITIVITY));
-        captureRequestBuilder.set(CaptureRequest.JPEG_QUALITY, Byte.valueOf(100 + ""));
+        captureRequestBuilder.set(CaptureRequest.JPEG_QUALITY, Byte.valueOf(100 + "")); // added by matthew plewa
 
         return captureRequestBuilder;
     }
