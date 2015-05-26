@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 
@@ -112,11 +113,13 @@ public class Camera
                     Logger.d(TAG, "Location changed " + location);
                     try
                     {
+                        mCameraCaptureSession.stopRepeating();
                         mCameraReady.set(Camera.this.mLocation != null);
                         Camera.this.mLocation = location;
                         CaptureRequest.Builder captureRequestBuilder = Camera.this.getStillCaptureRequestBuilder();
                         mStillCaptureRequest = captureRequestBuilder.build();
                         mCameraReady.set(true);
+                        repeatingCaptureImage();
                     }
                     catch (Exception e)
                     {
@@ -417,6 +420,7 @@ public class Camera
     {
         try
         {
+            Log.i("test", "" + mStillCaptureRequest.get(CaptureRequest.SENSOR_EXPOSURE_TIME));
             if (mCameraReady.get())
             {
                 Logger.d(TAG, "Initiating still capture");
