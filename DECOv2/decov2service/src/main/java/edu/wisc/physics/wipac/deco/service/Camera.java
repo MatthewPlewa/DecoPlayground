@@ -356,7 +356,7 @@ public class Camera
                         @Override
                         public void onImageAvailable(ImageReader reader)
                         {
-                            captureImage();
+                            //captureImage();//TODO this is done here so that we dont try to take more images from this
 
                             long imageNum = mNumImages.addAndGet(1);
                             Logger.d(TAG, "Still capture image " + imageNum + " available");
@@ -385,7 +385,7 @@ public class Camera
             mCaptureThread.start();
             mCaptureHandler = new Handler(mCaptureThread.getLooper());
 
-            captureImage();
+            repeatingCaptureImage();
         }
         catch (Exception e)
         {
@@ -402,6 +402,25 @@ public class Camera
             {
                 Logger.d(TAG, "Initiating still capture");
                 int captureId = mCameraCaptureSession.capture(mStillCaptureRequest, mStillCaptureCallback, mCaptureHandler);
+                Logger.d(TAG, "Capture ID " + captureId);
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.e(TAG, "Failed to capture image", e);
+        }
+    }
+
+    //This is a test to see if set repeating request will be able to be handled without additional
+    //code for saving the image
+    private void repeatingCaptureImage()
+    {
+        try
+        {
+            if (mCameraReady.get())
+            {
+                Logger.d(TAG, "Initiating still capture");
+                int captureId = mCameraCaptureSession.setRepeatingRequest(mStillCaptureRequest, mStillCaptureCallback, mCaptureHandler);
                 Logger.d(TAG, "Capture ID " + captureId);
             }
         }
