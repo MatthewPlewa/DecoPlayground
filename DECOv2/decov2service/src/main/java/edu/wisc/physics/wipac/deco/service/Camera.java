@@ -14,9 +14,11 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -101,24 +103,20 @@ public class Camera
                 }
             };
 
-   /* private LocationListener locationListener = TODO
+    private LocationListener locationListener =
             new LocationListener()
             {
-                //@Override
-                public void noonLocationChanged(Location location)
+                @Override
+                public void onLocationChanged(Location location)
                 {
                     Logger.d(TAG, "Location changed " + location);
                     try
                     {
-                        //You must stop the capture session before you can update the request!
-                        //mCameraCaptureSession.stopRepeating();
-
-                        //mCameraReady.set(Camera.this.mLocation != null);
-                        //Camera.this.mLocation = location;
-                        //CaptureRequest.Builder captureRequestBuilder = Camera.this.getStillCaptureRequestBuilder();
-                        //mStillCaptureRequest = captureRequestBuilder.build();
-                        //mCameraReady.set(true);
-                        //repeatingCaptureImage();//Restart the session with new request
+                        mCameraReady.set(Camera.this.mLocation != null);
+                        Camera.this.mLocation = location;
+                        CaptureRequest.Builder captureRequestBuilder = Camera.this.getStillCaptureRequestBuilder();
+                        mStillCaptureRequest = captureRequestBuilder.build();
+                        mCameraReady.set(true);
                     }
                     catch (Exception e)
                     {
@@ -144,7 +142,7 @@ public class Camera
                     Logger.d(TAG, "Location provider disabled " + provider);
                 }
             };
-*/
+
     private void setupLocationListener()
     {
         LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
@@ -156,11 +154,11 @@ public class Camera
         Logger.d(TAG, "Location provider " + locationProvider);
         if (locationProvider != null)
         {
-            //locationManager.requestLocationUpdates(locationProvider, MIN_TIME_LOCATION_UPDATES, MIN_DISTANCE_LOCATION_UPDATES, locationListener);TODO
+            locationManager.requestLocationUpdates(locationProvider, MIN_TIME_LOCATION_UPDATES, MIN_DISTANCE_LOCATION_UPDATES, locationListener);
             Location lastLocation = locationManager.getLastKnownLocation(locationProvider);
             if (lastLocation != null)
             {
-                //locationListener.onLocationChanged(lastLocation); TODO
+                locationListener.onLocationChanged(lastLocation);
             }
         }
     }
@@ -358,7 +356,7 @@ public class Camera
                         @Override
                         public void onImageAvailable(ImageReader reader)
                         {
-                            captureImage();//TODO this is done here so that we dont try to take more images from this
+                            //captureImage();//TODO this is done here so that we dont try to take more images from this
 
                             long imageNum = mNumImages.addAndGet(1);
                             Logger.d(TAG, "Still capture image " + imageNum + " available");
@@ -386,8 +384,8 @@ public class Camera
             mCaptureThread = new HandlerThread("Image Capture Thread");
             mCaptureThread.start();
             mCaptureHandler = new Handler(mCaptureThread.getLooper());
-            captureImage();
-            //repeatingCaptureImage();
+
+            repeatingCaptureImage();
         }
         catch (Exception e)
         {
