@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
@@ -30,9 +31,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -113,13 +116,13 @@ public class Camera
                     Logger.d(TAG, "Location changed " + location);
                     try
                     {
-                        mCameraCaptureSession.stopRepeating();
+                        //mCameraCaptureSession.stopRepeating();
                         mCameraReady.set(Camera.this.mLocation != null);
                         Camera.this.mLocation = location;
                         CaptureRequest.Builder captureRequestBuilder = Camera.this.getStillCaptureRequestBuilder();
                         mStillCaptureRequest = captureRequestBuilder.build();
                         mCameraReady.set(true);
-                        repeatingCaptureImage();
+                        //repeatingCaptureImage();
                     }
                     catch (Exception e)
                     {
@@ -359,7 +362,7 @@ public class Camera
                         @Override
                         public void onImageAvailable(ImageReader reader)
                         {
-                            //captureImage();//TODO this is done here so that we dont try to take more images from this
+                            captureImage();//TODO this is done here so that we dont try to take more images from this
 
                             long imageNum = mNumImages.addAndGet(1);
                             Logger.d(TAG, "Still capture image " + imageNum + " available");
@@ -387,8 +390,8 @@ public class Camera
             mCaptureThread = new HandlerThread("Image Capture Thread");
             mCaptureThread.start();
             mCaptureHandler = new Handler(mCaptureThread.getLooper());
-
-            repeatingCaptureImage();
+            captureImage();
+            //repeatingCaptureImage();
         }
         catch (Exception e)
         {
@@ -416,6 +419,8 @@ public class Camera
 
     //This is a test to see if set repeating request will be able to be handled without additional
     //code for saving the image
+
+    public List<CaptureRequest> capturearray= new ArrayList<>();
     private void repeatingCaptureImage()
     {
         try
@@ -424,8 +429,17 @@ public class Camera
             if (mCameraReady.get())
             {
                 Logger.d(TAG, "Initiating still capture");
-                int captureId = mCameraCaptureSession.setRepeatingRequest(mStillCaptureRequest, mStillCaptureCallback, mCaptureHandler);
+                Logger.i(TAG, "adding rquest");
+                if(mStillCaptureRequest==null)
+                    Logger.i(TAG,"its null");
+                capturearray.add(0, mStillCaptureRequest);
+
+
+                Logger.i(TAG, "added");
+                int captureId = mCameraCaptureSession.setRepeatingBurst(capturearray, mStillCaptureCallback, mCaptureHandler);
                 Logger.d(TAG, "Capture ID " + captureId);
+
+
             }
         }
         catch (Exception e)
@@ -464,7 +478,7 @@ public class Camera
         captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraCharacteristics.CONTROL_AE_MODE_OFF);
         if (exposure != null)
         {
-            captureRequestBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure);
+            captureRequestBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, (exposure));
         }
         captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
         captureRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF);
@@ -489,12 +503,22 @@ public class Camera
         try
         {
             Date now = new Date();
+            final String tmDevice, tmSerial, androidId;
+            final TelephonyManager tm = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+            tmDevice = "" + tm.getDeviceId();
+            tmSerial = "" + tm.getSimSerialNumber();
+            androidId = "" + android.provider.Settings.Secure.getString(mContext.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
 
+            UUID deviceUuid = new UUID(androidId.hashCode(), ((long)tmDevice.hashCode() << 32) | tmSerial.hashCode());
+            String deviceId = deviceUuid.toString();
             File dir = new File(Environment.getExternalStorageDirectory(), mContext.getResources().getString(R.string.app_name));
-            dir = new File(dir, IMAGE_DIR_FORMAT.format(now));
+            dir = new File(dir, IMAGE_DIR_FORMAT.format(now)+"_"+deviceId);
             dir.mkdirs();
 
-            String imageName = IMAGE_FILE_FORMAT.format(now) + ".jpg";
+
+
+
+            String imageName = deviceId+"_"+IMAGE_FILE_FORMAT.format(now) + ".jpg";
 
             File file = new File(dir, imageName);
             Logger.d(TAG, "Image " + file.getAbsolutePath());
