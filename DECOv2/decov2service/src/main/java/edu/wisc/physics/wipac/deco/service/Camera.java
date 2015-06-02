@@ -484,7 +484,7 @@ public class Camera
         captureRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF);
         captureRequestBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
         captureRequestBuilder.set(CaptureRequest.BLACK_LEVEL_LOCK, false);// without it unlocked it might cause issues
-        captureRequestBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, characteristics.get(CameraCharacteristics.SENSOR_MAX_ANALOG_SENSITIVITY));
+        captureRequestBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE).getUpper()); // check and see if thei causes issues. Andy's version for somer easonwouldnt work
         captureRequestBuilder.set(CaptureRequest.JPEG_QUALITY, Byte.valueOf(100 + "")); // added by matthew plewa
 
         if (mLocation != null)
